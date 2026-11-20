@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Афиша йога-тура — Yoga Tour Afisha</title>
+  <meta name="description" content="Генератор постеров для йога-туров и ретритов: фон через Pollinations, русский текст накладывается в браузере." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --sand: #f3efe6;
+      --foam: #eef4f1;
+      --ink: #1c241f;
+      --muted: #5c6a63;
+      --line: #d7cfc2;
+      --olive: #3f5a4a;
+      --olive-deep: #2a3d33;
+      --gold: #c4a574;
+      --card: rgba(255, 252, 247, 0.88);
+      --shadow: 0 24px 60px rgba(28, 36, 31, 0.12);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: Manrope, system-ui, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1200px 500px at 10% -10%, #e7efe8 0%, transparent 55%),
+        radial-gradient(900px 600px at 100% 0%, #efe4d2 0%, transparent 50%),
+        var(--sand);
+      min-height: 100vh;
+    }
+    a { color: var(--olive); }
+    header {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 28px 24px 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+    }
+    .brand {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+    }
+    .brand span { color: var(--olive); }
+    .badge img { height: 28px; display: block; }
+    main {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 12px 24px 64px;
+      display: grid;
+      grid-template-columns: minmax(300px, 420px) minmax(0, 1fr);
+      gap: 28px;
+      align-items: start;
+    }
+    h1 {
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-weight: 600;
+      font-size: 42px;
+      line-height: 1.1;
+      margin: 8px 0 10px;
+    }
+    .lede { color: var(--muted); margin: 0 0 22px; line-height: 1.55; }
+    form, .preview-card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    form { padding: 22px; display: grid; gap: 14px; }
+    label { display: grid; gap: 6px; font-size: 13px; font-weight: 600; color: var(--olive-deep); }
+    input, select, textarea, button, .chip {
+      font: inherit;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--ink);
+    }
+    textarea { min-height: 70px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 999px;
+      padding: 7px 12px;
+      cursor: pointer;
+      font-size: 13px;
+    }
+    .chip[aria-pressed="true"] {
+      background: var(--olive);
+      color: #fff;
+      border-color: var(--olive);
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+    button.primary, button.secondary {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+    button.primary { background: var(--olive); color: #fff; }
+    button.secondary { background: transparent; color: var(--olive-deep); border: 1px solid var(--line); }
+    button:disabled { opacity: 0.55; cursor: wait; }
+    .hint, .status, .key-note { font-size: 12px; color: var(--muted); font-weight: 500; line-height: 1.45; }
+    .status[data-kind="error"] { color: #8a2a2a; }
+    .key-box { background: #f7f3eb; border-radius: 12px; padding: 10px 12px; }
+    .preview-card { padding: 18px; position: sticky; top: 16px; }
+    .stage {
+      position: relative;
+      margin: 0 auto;
+      background: #1c241f;
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 420px;
+    }
+    canvas { max-width: 100%; height: auto; display: block; }
+    .placeholder {
+      color: #e8efe9;
+      text-align: center;
+      padding: 40px 24px;
+      font-family: "Cormorant Garamond", Georgia, serif;
+      font-size: 28px;
+    }
+    footer {
+      max-width: 1180px;
+      margin: 0 auto 40px;
+      padding: 0 24px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+      .preview-card { position: static; }
+      h1 { font-size: 34px; }
+      .row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">Yoga Tour <span>Afisha</span></div>
+    <a class="badge" href="https://pollinations.ai/?ref=badge" rel="noopener noreferrer">
+      <img src="https://raw.githubusercontent.com/pollinations/pollinations/main/packages/ui/src/brand/badge-made-with.svg" alt="Made with pollinations.ai" />
+    </a>
+  </header>
+  <main>
+    <section>
+      <h1>Афиша для йога-тура</h1>
+      <p class="lede">Соберите постер для ретрита в Сочи или Абхазии: место, формат и настроение задают фон через Pollinations Image API, а название и даты аккуратно накладываются поверх в браузере.</p>
+      <form id="form">
+        <div>
+          <div class="hint" style="margin-bottom:8px">Место</div>
+          <div class="chips" id="places"></div>
+        </div>
+        <label>Своё место
+          <input id="placeCustom" placeholder="Например: Гагра, пирс на рассвете" />
+        </label>
+        <label>Название тура
+          <input id="title" value="Йога на Чёрном море" maxlength="80" required />
+        </label>
+        <div class="row">
+          <label>Даты
+            <input id="dates" value="12–19 июня" maxlength="40" />
+          </label>
+          <label>Призыв
+            <input id="cta" value="Ретрит · Сочи" maxlength="40" />
+          </label>
+        </div>
+        <div class="row">
+          <label>Формат
+            <select id="format">
+              <option value="1080x1920" selected>История 9:16 — 1080×1920</option>
+              <option value="1080x1080">Пост 1:1 — 1080×1080</option>
+              <option value="1920x1080">Обложка 16:9 — 1920×1080</option>
+            </select>
+          </label>
+          <label>Настроение
+            <select id="mood">
+              <option value="dawn-pier" selected>Рассвет на пирсе</option>
+              <option value="mountain-mist">Туман в горах</option>
+              <option value="subtropical-garden">Субтропический сад</option>
+              <option value="sea-sunset">Закат над морем</option>
+              <option value="pine-deck">Деревянная терраса в соснах</option>
+              <option value="candle-shala">Тёплая зала со свечами</option>
+            </select>
+          </label>
+        </div>
+        <div class="key-box">
+          <label>Ключ Pollinations (необязательно, только в этом браузере)
+            <input id="apiKey" type="password" autocomplete="off" placeholder="sk_… — свой ключ, не ключ проекта" />
+          </label>
+          <p class="key-note">Ключ никуда не отправляется, кроме официального API gen.pollinations.ai, и не записывается в репозиторий. Без ключа сработает только ответ из общего кэша. Для постоянной работы посетитель тратит свой Pollen. Не вставляйте секретный ключ аккаунта в публичную страницу как значение по умолчанию.</p>
+        </div>
+        <div class="actions">
+          <button type="submit" class="primary" id="generate">Собрать афишу</button>
+          <button type="button" class="secondary" id="download" disabled>Скачать PNG</button>
+        </div>
+        <p class="status" id="status" role="status"></p>
+      </form>
+    </section>
+    <section class="preview-card">
+      <div class="stage" id="stage">
+        <div class="placeholder" id="placeholder">Здесь появится афиша</div>
+        <canvas id="canvas" hidden></canvas>
+      </div>
+    </section>
+  </main>
+  <footer>
+    Свободный статический инструмент. Фон генерирует <a href="https://pollinations.ai/?ref=badge">Pollinations</a>, текст рисуется локально, чтобы кириллица оставалась ровной. Не содержит секретных ключей.
+  </footer>
+  <script>
+    const PLACES = [
+      { id: "sochi-sea", label: "Сочи, море", prompt: "Black Sea coast in Sochi, pebbled beach, morning light, distant Caucasus foothills" },
+      { id: "krasnaya-polyana", label: "Красная Поляна", prompt: "Krasnaya Polyana mountains, alpine meadow, wooden yoga shala, misty peaks" },
+      { id: "abkhazia", label: "Абхазия", prompt: "Abkhazia subtropical coastline, cypress trees, turquoise water, quiet bay" },
+      { id: "gagra", label: "Гагра", prompt: "historic Gagra colonnade and seaside park, warm evening light, palms" },
+      { id: "pitsunda", label: "Пицунда", prompt: "Pitsunda pine grove meeting the sea, tall pines, golden path, soft haze" }
+    ];
+    const MOODS = {
+      "dawn-pier": "dawn on a wooden pier, pastel sky, calm water reflections, cinematic still",
+      "mountain-mist": "soft mountain mist, cool air, quiet and spacious, natural light",
+      "subtropical-garden": "lush subtropical garden, magnolia and palms, dappled sunlight",
+      "sea-sunset": "sunset over the sea, honey-colored light, gentle waves, film photography",
+      "pine-deck": "wooden deck among pine trees, yoga mats suggested but empty, warm shade",
+      "candle-shala": "intimate yoga shala, candles, linen curtains, warm interior, no faces"
+    };
+    const IMAGE_API = "https://gen.pollinations.ai/image/";
+    const MODEL = "tongyi-mai/z-image-turbo";
+    const placesEl = document.getElementById("places");
+    let selectedPlace = PLACES[0].id;
+    PLACES.forEach((place) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chip";
+      btn.textContent = place.label;
+      btn.dataset.id = place.id;
+      btn.setAttribute("aria-pressed", place.id === selectedPlace ? "true" : "false");
+      btn.addEventListener("click", () => {
+        selectedPlace = place.id;
+        placesEl.querySelectorAll(".chip").forEach((el) => el.setAttribute("aria-pressed", el.dataset.id === selectedPlace ? "true" : "false"));
+      });
+      placesEl.appendChild(btn);
+    });
+
+    const keyInput = document.getElementById("apiKey");
+    const savedKey = sessionStorage.getItem("pollinations_user_sk") || "";
+    if (savedKey) keyInput.value = savedKey;
+    keyInput.addEventListener("change", () => {
+      const value = keyInput.value.trim();
+      if (value) sessionStorage.setItem("pollinations_user_sk", value);
+      else sessionStorage.removeItem("pollinations_user_sk");
+    });
+
+    const canvas = document.getElementById("canvas");
+    const ctx = canvas.getContext("2d");
+    const statusEl = document.getElementById("status");
+    const downloadBtn = document.getElementById("download");
+    const placeholder = document.getElementById("placeholder");
+
+    function setStatus(text, kind) {
+      statusEl.textContent = text;
+      statusEl.dataset.kind = kind || "";
+    }
+
+    function buildPrompt() {
+      const custom = document.getElementById("placeCustom").value.trim();
+      const place = PLACES.find((item) => item.id === selectedPlace);
+      const location = custom || place.prompt;
+      const mood = MOODS[document.getElementById("mood").value];
+      return [
+        "Photorealistic travel photography background for a yoga retreat poster.",
+        location + ".",
+        mood + ".",
+        "Empty scenic space in the lower third for typography.",
+        "No text, no letters, no typography, no logos, no watermark, no readable signage, no faces close-up."
+      ].join(" ");
+    }
+
+    function fitFont(text, base, maxWidth) {
+      let size = base;
+      ctx.font = "600 " + size + "px 'Cormorant Garamond', Georgia, serif";
+      while (size > 28 && ctx.measureText(text).width > maxWidth) {
+        size -= 2;
+        ctx.font = "600 " + size + "px 'Cormorant Garamond', Georgia, serif";
+      }
+      return size;
+    }
+
+    function compose(image, width, height, title, dates, cta) {
+      canvas.width = width;
+      canvas.height = height;
+      ctx.clearRect(0, 0, width, height);
+      ctx.drawImage(image, 0, 0, width, height);
+      const gradient = ctx.createLinearGradient(0, height * 0.45, 0, height);
+      gradient.addColorStop(0, "rgba(20, 28, 24, 0)");
+      gradient.addColorStop(0.55, "rgba(20, 28, 24, 0.35)");
+      gradient.addColorStop(1, "rgba(20, 28, 24, 0.78)");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, width, height);
+      const pad = Math.round(width * 0.08);
+      const maxWidth = width - pad * 2;
+      const titleSize = fitFont(title, Math.round(width * 0.11), maxWidth);
+      ctx.fillStyle = "#f7f1e6";
+      ctx.textBaseline = "bottom";
+      const titleY = height - pad - Math.round(height * 0.14);
+      ctx.fillText(title, pad, titleY);
+      ctx.font = "500 " + Math.round(width * 0.035) + "px Manrope, sans-serif";
+      ctx.fillStyle = "#e4d3b0";
+      const meta = [dates, cta].filter(Boolean).join("   ·   ");
+      ctx.fillText(meta, pad, titleY + Math.round(titleSize * 0.7));
+      placeholder.hidden = true;
+      canvas.hidden = false;
+      downloadBtn.disabled = false;
+    }
+
+    async function generate(event) {
+      event.preventDefault();
+      const [width, height] = document.getElementById("format").value.split("x").map(Number);
+      const title = document.getElementById("title").value.trim();
+      const dates = document.getElementById("dates").value.trim();
+      const cta = document.getElementById("cta").value.trim();
+      const key = keyInput.value.trim();
+      const prompt = buildPrompt();
+      const seed = Math.floor(Math.random() * 1e9);
+      const url = new URL(IMAGE_API + encodeURIComponent(prompt));
+      url.searchParams.set("model", MODEL);
+      url.searchParams.set("width", String(width));
+      url.searchParams.set("height", String(height));
+      url.searchParams.set("seed", String(seed));
+      const headers = { Accept: "image/*" };
+      if (key) headers.Authorization = "Bearer " + key;
+      setStatus("Рисую фон через Pollinations…");
+      document.getElementById("generate").disabled = true;
+      downloadBtn.disabled = true;
+      try {
+        const response = await fetch(url.toString(), { headers });
+        if (response.status === 401) throw new Error("Нужен ключ Pollinations (sk_). Создайте его в enter.pollinations.ai/keys и вставьте сюда — только свой, не чужой.");
+        if (response.status === 402) throw new Error("На ключе закончился Pollen. Пополните баланс или используйте другой ключ.");
+        if (!response.ok) throw new Error("Pollinations ответил " + response.status + ". Попробуйте ещё раз.");
+        const blob = await response.blob();
+        const image = await createImageBitmap(blob);
+        await document.fonts.ready;
+        compose(image, width, height, title, dates, cta);
+        setStatus("Готово. Можно скачать PNG.");
+      } catch (error) {
+        setStatus(error.message || String(error), "error");
+      } finally {
+        document.getElementById("generate").disabled = false;
+      }
+    }
+
+    document.getElementById("form").addEventListener("submit", generate);
+    downloadBtn.addEventListener("click", () => {
+      const link = document.createElement("a");
+      const title = document.getElementById("title").value.trim() || "yoga-tour-afisha";
+      link.download = title.replace(/[^\wа-яё-]+/gi, "-").replace(/-+/g, "-") + ".png";
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    });
+  </script>
+</body>
+</html>
