@@ -11,9 +11,8 @@ A small static web app for yoga-tour and retreat posters (Sochi, Abkhazia, and n
 - API: `GET https://gen.pollinations.ai/image/{prompt}`
 - Default model: `tongyi-mai/z-image-turbo`
 - Sizes: 1080×1920 (stories), 1080×1080 (post), 1920×1080 (cover)
-- No secret keys in the repository. A visitor may paste their own `sk_` key into the page; it stays in `sessionStorage` of that browser and is sent only to `gen.pollinations.ai` as `Authorization: Bearer`.
-- Identical uncached generations need a key and spend the visitor's Pollen. Identical cached requests may be served without a key, as documented in the official API docs.
-- Do not ship a personal `sk_` in this page. After the public URL is known, a publishable App Key (`pk_`) can be registered at [enter.pollinations.ai/keys](https://enter.pollinations.ai/keys) and [Pollinations Pay / BYOP](https://github.com/pollinations/pollinations/blob/main/BRING_YOUR_OWN_POLLEN.md) can replace the paste-a-key field.
+- No secret keys in the repository. Visitors sign in with Pollinations via the official `<polli-connect>` button ([Pollinations Pay](https://github.com/pollinations/pollinations/blob/main/BRING_YOUR_OWN_POLLEN.md)); the page never asks them to paste a key.
+- After sign-in, the user's key stays in the browser and is sent only to `gen.pollinations.ai` as `Authorization: Bearer`. Uncached generations use the visitor's Pollen. Identical cached requests may be served without a key, as documented in the official API docs.
 
 ## Run locally
 

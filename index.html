@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script defer src="https://cdn.jsdelivr.net/npm/@pollinations/ui@0.1.0-alpha.20/dist/connect.js"></script>
   <style>
     :root {
       --sand: #f3efe6;
@@ -115,7 +116,8 @@
     button:disabled { opacity: 0.55; cursor: wait; }
     .hint, .status, .key-note { font-size: 12px; color: var(--muted); font-weight: 500; line-height: 1.45; }
     .status[data-kind="error"] { color: #8a2a2a; }
-    .key-box { background: #f7f3eb; border-radius: 12px; padding: 10px 12px; }
+    .key-box { background: #f7f3eb; border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+    .key-label { font-size: 13px; font-weight: 600; margin: 0; }
     .preview-card { padding: 18px; position: sticky; top: 16px; }
     .stage {
       position: relative;
@@ -201,10 +203,9 @@
           </label>
         </div>
         <div class="key-box">
-          <label>Ключ Pollinations (необязательно, только в этом браузере)
-            <input id="apiKey" type="password" autocomplete="off" placeholder="sk_… — свой ключ, не ключ проекта" />
-          </label>
-          <p class="key-note">Ключ никуда не отправляется, кроме официального API gen.pollinations.ai, и не записывается в репозиторий. Без ключа сработает только ответ из общего кэша. Для постоянной работы посетитель тратит свой Pollen. Не вставляйте секретный ключ аккаунта в публичную страницу как значение по умолчанию.</p>
+          <p class="key-label">Вход в Pollinations</p>
+          <polli-connect></polli-connect>
+          <p class="key-note">Войдите через официальную кнопку Pollinations — генерации идут с вашего баланса, ключ вставлять не нужно. Без входа может сработать только ответ из общего кэша.</p>
         </div>
         <div class="actions">
           <button type="submit" class="primary" id="generate">Собрать афишу</button>
@@ -257,14 +258,10 @@
       placesEl.appendChild(btn);
     });
 
-    const keyInput = document.getElementById("apiKey");
-    const savedKey = sessionStorage.getItem("pollinations_user_sk") || "";
-    if (savedKey) keyInput.value = savedKey;
-    keyInput.addEventListener("change", () => {
-      const value = keyInput.value.trim();
-      if (value) sessionStorage.setItem("pollinations_user_sk", value);
-      else sessionStorage.removeItem("pollinations_user_sk");
-    });
+    const connectEl = document.querySelector("polli-connect");
+    function currentUserKey() {
+      return (connectEl && connectEl.apiKey) ? String(connectEl.apiKey) : "";
+    }
 
     const canvas = document.getElementById("canvas");
     const ctx = canvas.getContext("2d");
@@ -334,7 +331,7 @@
       const title = document.getElementById("title").value.trim();
       const dates = document.getElementById("dates").value.trim();
       const cta = document.getElementById("cta").value.trim();
-      const key = keyInput.value.trim();
+      const key = currentUserKey();
       const prompt = buildPrompt();
       const seed = Math.floor(Math.random() * 1e9);
       const url = new URL(IMAGE_API + encodeURIComponent(prompt));
@@ -349,8 +346,8 @@
       downloadBtn.disabled = true;
       try {
         const response = await fetch(url.toString(), { headers });
-        if (response.status === 401) throw new Error("Нужен ключ Pollinations (sk_). Создайте его в enter.pollinations.ai/keys и вставьте сюда — только свой, не чужой.");
-        if (response.status === 402) throw new Error("На ключе закончился Pollen. Пополните баланс или используйте другой ключ.");
+        if (response.status === 401) throw new Error("Войдите в Pollinations кнопкой выше, чтобы генерация шла с вашего баланса.");
+        if (response.status === 402) throw new Error("На балансе Pollinations закончился Pollen. Пополните его в аккаунте Pollinations и попробуйте снова.");
         if (!response.ok) throw new Error("Pollinations ответил " + response.status + ". Попробуйте ещё раз.");
         const blob = await response.blob();
         const image = await createImageBitmap(blob);
